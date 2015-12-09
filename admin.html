@@ -193,6 +193,10 @@
         }
 
         function addNumber(gameID) {
+            if (possibleNumbers.length === calledNumbers.length) {
+                stopGame();
+                return false;
+            }
             var number = _.sample(_.difference(possibleNumbers, calledNumbers));
 
             var obj = {};
@@ -281,11 +285,7 @@
 
         $stopButton.click(function(e){
             e.preventDefault();
-            if (/started|paused/.test(bingoTimer.getStatus())) {
-                bingoTimer.stop();
-            }
-
-            db.child(gameID).child('status').set({ stopped : true });
+            stopGame();
         });
 
         $updateDuration.click(function(e){
@@ -293,6 +293,14 @@
 
             bingoInterval = parseInt($time.val());
         });
+
+        function stopGame() {
+            if (/started|paused/.test(bingoTimer.getStatus())) {
+                bingoTimer.stop();
+            }
+
+            db.child(gameID).child('status').set({ stopped : true });
+        }
 
         function startGame(gameID) {
             $logEl.text('');
