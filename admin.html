@@ -297,7 +297,7 @@
         function startGame(gameID) {
             $logEl.text('');
             $('td').removeClass('active');
-            $('#link').val('https://office-bingo.firebaseapp.com/index.html#'+gameID);
+            $('#link').val('http://msurguy.github.io/bingo-firebase-app/index.html#'+gameID);
             bingoTimer.start(bingoInterval);
             addNumber(gameID);
             listenToGame(gameID);
