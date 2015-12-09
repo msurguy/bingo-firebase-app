@@ -296,6 +296,7 @@
 
         function startGame(gameID) {
             $logEl.text('');
+            bingoTimer.stop();
             $('td').removeClass('active');
             $('#link').val('http://msurguy.github.io/bingo-firebase-app/index.html#'+gameID);
             bingoTimer.start(bingoInterval);
