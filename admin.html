@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/paper/bootstrap.min.css" rel="stylesheet" integrity="sha256-hMIwZV8FylgKjXnmRI2YY0HLnozYr7Cuo1JvRtzmPWs= sha512-k+wW4K+gHODPy/0gaAMUNmCItIunOZ+PeLW7iZwkDZH/wMaTrSJTt7zK6TGy6p+rnDBghAxdvu1LX2Ohg0ypDw==" crossorigin="anonymous">
+    <script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src='//cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+    <script src="//underscorejs.org/underscore-min.js"></script>
+    <meta charset="utf-8">
+    <title>Office Bingo</title>
+
+    <style>
+        .table>tbody>tr>td.active {
+            background: #FEC10D;
+        }
+
+        .table>tbody>tr>td.danger {
+            background: #5E5F61 ;
+            color: #FFF;
+            font-weight:bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <h1><img src="logo.jpg" class="img-responsive" alt=""></h1>
+        </div>
+        <div class="col-md-3">
+            <h2 style="padding-top: 20px;">BINGO</h2>
+        </div>
+        <div class="col-md-5">
+            <h2 id="game-status" class="text-danger"></h2>
+        </div>
+    </div>
+    <div class="row text-right">
+        <p><button id="new-game-button" class="btn btn-default">Create New Game</button></p>
+    </div>
+    <div class="row">
+        <table class="table table-striped text-center">
+            <tr>
+                <td class="danger">B</td>
+                <td>1</td>
+                <td>2</td>
+                <td>3</td>
+                <td>4</td>
+                <td>5</td>
+                <td>6</td>
+                <td>7</td>
+                <td>8</td>
+                <td>9</td>
+                <td>10</td>
+                <td>11</td>
+                <td>12</td>
+                <td>13</td>
+                <td>14</td>
+                <td>15</td>
+            </tr>
+            <tr>
+                <td class="danger">I</td>
+                <td>16</td>
+                <td>17</td>
+                <td>18</td>
+                <td>19</td>
+                <td>20</td>
+                <td>21</td>
+                <td>22</td>
+                <td>23</td>
+                <td>24</td>
+                <td>25</td>
+                <td>26</td>
+                <td>27</td>
+                <td>28</td>
+                <td>29</td>
+                <td>30</td>
+            </tr>
+            <tr>
+                <td class="danger">N</td>
+                <td>31</td>
+                <td>32</td>
+                <td>33</td>
+                <td>34</td>
+                <td>35</td>
+                <td>36</td>
+                <td>37</td>
+                <td>38</td>
+                <td>39</td>
+                <td>40</td>
+                <td>41</td>
+                <td>42</td>
+                <td>43</td>
+                <td>44</td>
+                <td>45</td>
+            </tr>
+            <tr>
+                <td class="danger">G</td>
+                <td>46</td>
+                <td>47</td>
+                <td>48</td>
+                <td>49</td>
+                <td>50</td>
+                <td>51</td>
+                <td>52</td>
+                <td>53</td>
+                <td>54</td>
+                <td>55</td>
+                <td>56</td>
+                <td>57</td>
+                <td>58</td>
+                <td>59</td>
+                <td>60</td>
+            </tr>
+            <tr>
+                <td class="danger">O</td>
+                <td>61</td>
+                <td>62</td>
+                <td>63</td>
+                <td>64</td>
+                <td>65</td>
+                <td>66</td>
+                <td>67</td>
+                <td>68</td>
+                <td>69</td>
+                <td>70</td>
+                <td>71</td>
+                <td>72</td>
+                <td>73</td>
+                <td>74</td>
+                <td>75</td>
+            </tr>
+        </table>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <p>Link to this game (share via email):</p>
+            <input type="text" class="form-control" id="link">
+        </div>
+        <div class="col-md-3">
+            <p class="lead">Timer (in sec): <span id="timer"></span></p>
+            <input id="time-input" name="time-input" class="form-control" type="text" value="600"/>
+            <button id="update-duration" class="btn btn-default btn-sm">Update duration</button>
+        </div>
+        <div class="col-md-3">
+            <button id="pause" class="btn btn-default">Pause Timer</button>
+            <button id="stop" class="btn btn-default">Stop Timer</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Numbers Called:</h2>
+            <p class="lead" id="log">
+
+            </p>
+        </div>
+    </div>
+</div>
+<script>
+    !function(a,b){"use strict";"function"==typeof define&&define.amd?define([],b):"object"==typeof exports?module.exports=b():a.Timer=b()}(this,function(){"use strict";function a(){c.call(this),this._.status="stopped",b.call(this,"onend")}function b(a){var b=this._.options[a],c=[].slice.call(arguments,1);"function"==typeof b&&b.apply(this,c)}function c(a){clearTimeout(this._.timeout),clearInterval(this._.interval),a===!0&&(this._.duration=0)}var d={tick:1,onstart:null,ontick:null,onpause:null,onstop:null,onend:null},e=function(a){if(!(this instanceof e))return new e(a);this._={id:+new Date,options:{},duration:0,status:"initialized",start:0,measures:[]};for(var b in d)this._.options[b]=d[b];this.options(a)};return e.prototype.start=function(c){return+c||this._.duration?(c&&(c*=1e3),this._.timeout&&"started"===this._.status?this:(this._.duration=c||this._.duration,this._.timeout=setTimeout(a.bind(this),this._.duration),"function"==typeof this._.options.ontick&&(this._.interval=setInterval(function(){b.call(this,"ontick",this.getDuration())}.bind(this),1e3*+this._.options.tick)),this._.start=+new Date,this._.status="started",b.call(this,"onstart",this.getDuration()),this)):this},e.prototype.pause=function(){return"started"!==this._.status?this:(this._.duration-=+new Date-this._.start,c.call(this,!1),this._.status="paused",b.call(this,"onpause"),this)},e.prototype.stop=function(){return/started|paused/.test(this._.status)?(c.call(this,!0),this._.status="stopped",b.call(this,"onstop"),this):this},e.prototype.getDuration=function(){return"started"===this._.status?this._.duration-(+new Date-this._.start):"paused"===this._.status?this._.duration:0},e.prototype.getStatus=function(){return this._.status},e.prototype.options=function(a,b){if(a&&b&&(this._.options[a]=b),!b&&"object"==typeof a)for(var c in a)this._.options.hasOwnProperty(c)&&(this._.options[c]=a[c]);return this},e.prototype.on=function(a,b){return"string"!=typeof a||"function"!=typeof b?this:(/^on/.test(a)||(a="on"+a),this._.options.hasOwnProperty(a)&&(this._.options[a]=b),this)},e.prototype.off=function(a){return"string"!=typeof a?this:(a=a.toLowerCase(),"all"===a?(this._.options=d,this):(/^on/.test(a)||(a="on"+a),this._.options.hasOwnProperty(a)&&(this._.options[a]=d[a]),this))},e.prototype.measureStart=function(a){return this._.measures[a||""]=+new Date,this},e.prototype.measureStop=function(a){return+new Date-this._.measures[a||""]},e});
+
+    $( document ).ready(function() {
+
+        function makeid()
+        {
+            var text = "";
+            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+            for( var i=0; i < 5; i++ )
+                text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+            return text;
+        }
+
+        var bingoInterval = 10*60; // 10 minutes
+
+        var calledNumbers = [];
+        var possibleNumbers = [];
+
+        var $newGameButton = $('#new-game-button');
+        var $pauseButton = $('#pause');
+        var $stopButton = $('#stop');
+        var $timer = $('#timer');
+        var db = new Firebase('https://office-bingo.firebaseio.com');
+
+        var gameID = '';
+        var $tableEl = $('table').first();
+        var $logEl = $('#log');
+        var $time  = $('#time-input');
+        var $updateDuration  = $('#update-duration');
+
+        for(var i = 1; i <= 75; i++) {
+            possibleNumbers.push(i);
+        }
+
+        function addNumber(gameID) {
+            var number = _.sample(_.difference(possibleNumbers, calledNumbers));
+
+            var obj = {};
+            obj[number] = true;
+            db.child(gameID).update(obj);
+            db.child(gameID).child('history').push(number);
+            calledNumbers.push(number);
+
+        }
+
+        function listenToGame(gameID) {
+            db.child(gameID).on("value", function(snapshot) {
+                if (snapshot.val()) {
+                    $.each(snapshot.val(), function(index, value){
+                        $tableEl.find('td').filter(function() {
+                            return $(this).text() === index;
+                        }).addClass('active');
+                    });
+                }
+
+            });
+
+            db.child(gameID +'/history').on("value", function(snapshot) {
+                $logEl.text('');
+                if (snapshot.val()) {
+                    $.each(snapshot.val(), function (index, value) {
+                        $logEl.text($logEl.text() + value + ', ');
+                    });
+                }
+            });
+
+            db.child(gameID +'/status').on("value", function(snapshot) {
+                if(snapshot.val()) {
+                    if(snapshot.val().stopped) {
+                        $('#game-status').text('Game has been stopped');
+                    } else {
+                        $('#game-status').text('');
+                    }
+                }
+            });
+        }
+
+        var bingoTimer = new Timer({
+            onstart : function(millisec) {
+                var sec = Math.round(millisec / 1000);
+                $timer.text(sec);
+            },
+            ontick  : function(millisec) {
+                var sec = Math.round(millisec / 1000);
+                $timer.text(sec);
+            },
+            onpause : function() {
+                $timer.text('paused');
+            },
+            onstop  : function() {
+                $timer.text('stopped');
+            },
+            onend   : function() {
+                addNumber(gameID);
+                bingoTimer.start(bingoInterval);
+            }
+        });
+
+        $newGameButton.click(function(e){
+            e.preventDefault();
+            gameID = makeid();
+            bingoInterval = parseInt($time.val());
+            startGame(gameID);
+            alert('New Game has been created. Please find new link below');
+        });
+        var flip = false;
+
+        $pauseButton.click(function(e){
+            e.preventDefault();
+
+            if (flip) {
+                db.child(gameID).child('status').set({ stopped : false });
+                bingoTimer.start(bingoTimer.getDuration()/1000);
+            } else {
+                $(this).text('Unpause');
+                bingoTimer.pause();
+            }
+            flip = !flip;
+
+        });
+
+        $stopButton.click(function(e){
+            e.preventDefault();
+            if (/started|paused/.test(bingoTimer.getStatus())) {
+                bingoTimer.stop();
+            }
+
+            db.child(gameID).child('status').set({ stopped : true });
+        });
+
+        $updateDuration.click(function(e){
+            e.preventDefault();
+
+            bingoInterval = parseInt($time.val());
+        });
+
+        function startGame(gameID) {
+            $logEl.text('');
+            $('td').removeClass('active');
+            $('#link').val('https://office-bingo.firebaseapp.com/index.html#'+gameID);
+            bingoTimer.start(bingoInterval);
+            addNumber(gameID);
+            listenToGame(gameID);
+        }
+
+
+    });
+
+
+</script>
+</body>
+</html>

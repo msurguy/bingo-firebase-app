@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="//maxcdn.bootstrapcdn.com/bootswatch/3.3.5/paper/bootstrap.min.css" rel="stylesheet" integrity="sha256-hMIwZV8FylgKjXnmRI2YY0HLnozYr7Cuo1JvRtzmPWs= sha512-k+wW4K+gHODPy/0gaAMUNmCItIunOZ+PeLW7iZwkDZH/wMaTrSJTt7zK6TGy6p+rnDBghAxdvu1LX2Ohg0ypDw==" crossorigin="anonymous">
+    <script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src='//cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+    <script src="//underscorejs.org/underscore-min.js"></script>
+    <meta charset="utf-8">
+    <title>Office Bingo</title>
+
+    <style>
+        .table>tbody>tr>td.active {
+            background: #FEC10D;
+        }
+
+        .table>tbody>tr>td.danger {
+            background: #5E5F61 ;
+            color: #FFF;
+            font-weight:bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <h1><img src="logo.jpg" class="img-responsive" alt=""></h1>
+        </div>
+        <div class="col-md-3">
+            <h2 style="padding-top: 20px;">BINGO</h2>
+        </div>
+        <div class="col-md-5">
+            <h2 id="game-status" class="text-danger"></h2>
+        </div>
+    </div>
+    <div class="row">
+        <table class="table table-striped text-center">
+            <tr>
+                <td class="danger">B</td>
+                <td>1</td>
+                <td>2</td>
+                <td>3</td>
+                <td>4</td>
+                <td>5</td>
+                <td>6</td>
+                <td>7</td>
+                <td>8</td>
+                <td>9</td>
+                <td>10</td>
+                <td>11</td>
+                <td>12</td>
+                <td>13</td>
+                <td>14</td>
+                <td>15</td>
+            </tr>
+            <tr>
+                <td class="danger">I</td>
+                <td>16</td>
+                <td>17</td>
+                <td>18</td>
+                <td>19</td>
+                <td>20</td>
+                <td>21</td>
+                <td>22</td>
+                <td>23</td>
+                <td>24</td>
+                <td>25</td>
+                <td>26</td>
+                <td>27</td>
+                <td>28</td>
+                <td>29</td>
+                <td>30</td>
+            </tr>
+            <tr>
+                <td class="danger">N</td>
+                <td>31</td>
+                <td>32</td>
+                <td>33</td>
+                <td>34</td>
+                <td>35</td>
+                <td>36</td>
+                <td>37</td>
+                <td>38</td>
+                <td>39</td>
+                <td>40</td>
+                <td>41</td>
+                <td>42</td>
+                <td>43</td>
+                <td>44</td>
+                <td>45</td>
+            </tr>
+            <tr>
+                <td class="danger">G</td>
+                <td>46</td>
+                <td>47</td>
+                <td>48</td>
+                <td>49</td>
+                <td>50</td>
+                <td>51</td>
+                <td>52</td>
+                <td>53</td>
+                <td>54</td>
+                <td>55</td>
+                <td>56</td>
+                <td>57</td>
+                <td>58</td>
+                <td>59</td>
+                <td>60</td>
+            </tr>
+            <tr>
+                <td class="danger">O</td>
+                <td>61</td>
+                <td>62</td>
+                <td>63</td>
+                <td>64</td>
+                <td>65</td>
+                <td>66</td>
+                <td>67</td>
+                <td>68</td>
+                <td>69</td>
+                <td>70</td>
+                <td>71</td>
+                <td>72</td>
+                <td>73</td>
+                <td>74</td>
+                <td>75</td>
+            </tr>
+        </table>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Numbers Called:</h2>
+            <p class="lead" id="log">
+
+            </p>
+        </div>
+    </div>
+</div>
+<script>
+    $( document ).ready(function() {
+        var db = new Firebase('https://office-bingo.firebaseio.com');
+
+        var gameID = '';
+        var $tableEl = $('table').first();
+        var $logEl = $('#log');
+
+        if(window.location.hash) {
+            gameID = window.location.hash.substr(1);
+        }
+        // get hash of the game and use it as the gameID
+
+        // Only receive events here and possibly show the timer
+        function listenToGame(gameID) {
+            db.child(gameID).on("value", function(snapshot) {
+                if(snapshot.val()){
+                    $.each(snapshot.val(), function(index, value){
+                        $tableEl.find('td').filter(function() {
+                            return $(this).text() === index;
+                        }).addClass('active');
+                    });
+                }
+
+            });
+
+            db.child(gameID +'/history').on("value", function(snapshot) {
+                if(snapshot.val()) {
+                    $logEl.text('');
+                    $.each(snapshot.val(), function (index, value) {
+                        $logEl.text($logEl.text() + value + ', ');
+                    });
+                }
+            });
+
+            db.child(gameID +'/status').on("value", function(snapshot) {
+                if(snapshot.val()) {
+                    if(snapshot.val().stopped) {
+                        $('#game-status').text('Game has been stopped');
+                    } else {
+                        $('#game-status').text('');
+                    }
+                }
+            });
+        }
+
+        listenToGame(gameID);
+
+    });
+
+</script>
+</body>
+</html>
